@@ -6,7 +6,7 @@ module.exports = class LoginRouter {
   }
 
   route (httpRequest) {
-    if (!httpRequest) {
+    if (!httpRequest || !this.authUseCase || !this.authUseCase.auth) {
       return HttpRequest.serverError()
     }
     if (!httpRequest.body) {
@@ -19,7 +19,10 @@ module.exports = class LoginRouter {
     if (!password) {
       return HttpRequest.badRequest('password')
     }
-    this.authUseCase.auth(email, password)
-    return HttpRequest.unauthorized()
+    const accessToken = this.authUseCase.auth(email, password)
+    if (!accessToken) {
+      return HttpRequest.unauthorized()
+    }
+    return HttpRequest.ok()
   }
 }
